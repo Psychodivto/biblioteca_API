@@ -1,5 +1,7 @@
 import graphene
 
+from graphene import relay
+
 from graphene_django import DjangoObjectType
 
 from django.contrib.auth import get_user_model
@@ -22,7 +24,7 @@ class Query(graphene.ObjectType):
         return get_user_model().objects.all()
 
 class CreateUser(graphene.Mutation):
-    user = graphene.Field(UserType)
+    all_user = graphene.Field(UserType)
     
 
     class Arguments:
@@ -40,5 +42,22 @@ class CreateUser(graphene.Mutation):
 
         return CreateUser(user=user)
 
+class delete_user(graphene.Mutation):
+    user = graphene.Field(UserType)
+
+    class Arguments:
+        id = graphene.Int(required=True)
+
+    def mutate(self, info, id):
+        user = get_user_model().objects.get(id=id)
+        user.delete()
+
+        return delete_user(user=user)
+
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
+    delete_user = delete_user.Field()
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
+
+
